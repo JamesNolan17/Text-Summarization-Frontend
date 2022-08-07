@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Typography from '@mui/material/Typography';
-import {Card, Container, FormControl, Grid, MenuItem, TextField} from "@mui/material";
+import {Alert, Card, Container, FormControl, Grid, MenuItem, Modal, TextField} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import Box from "@mui/material/Box";
 import ArticleIcon from '@mui/icons-material/Article';
@@ -12,20 +12,22 @@ import axios from "axios";
 
 export default function TextSummarizer() {
     const IP_Predict = 'http://localhost:8000/text/input';
+    const [alert, setAlert] = React.useState(false);
+    const [alertContent, setAlertContent] = React.useState('');
     const [inputText, setInputText] = React.useState('');
-    const handleInputTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setInputText(event.target.value);
-    };
-
+    const [label, setLabel] = React.useState('Keyword');
     const [articleType, setArticleType] = React.useState('');
-    const handleArticleTypeChange = (event: SelectChangeEvent) => {
-        setArticleType(event.target.value);
-    };
-
     const [summarizedText, setSummarizedText] = React.useState('');
+
     const handleSummarizedTextChange = (event: SelectChangeEvent) => {
         setSummarizedText(event.target.value);
     }
+    const handleInputTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setInputText(event.target.value);
+    };
+    const handleArticleTypeChange = (event: SelectChangeEvent) => {
+        setArticleType(event.target.value);
+    };
 
     const handleSubmit = event => {
         event.preventDefault();
@@ -33,7 +35,7 @@ export default function TextSummarizer() {
         axios.post(IP_Predict,
             {
                 "raw_text": payloadText,
-                "article_type": articleType
+                "article_type": articleType,
             },
             {
             headers: {
@@ -41,11 +43,14 @@ export default function TextSummarizer() {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': 'MeSqAaXtGAgI7grNXRN75Vp7XFPgDcam7b1wd8BGFC6NGYdKrfwDkJsKcBTqNeGF'
         }}).then(res => {
-                console.log(res);
-                console.log(res.data);
-            })
+                setSummarizedText(res.data.summary);
+                setLabel(res.data.labels);
+                console.log(label);
+            }).catch(function (error) {
+            setAlertContent("Invalid input text!");
+            setAlert(true);
+        });
     }
-
 
     const useStyles = makeStyles(theme => ({
         container: {
@@ -77,8 +82,26 @@ export default function TextSummarizer() {
         );
     };
 
+    const Label = ({labelName}) => {
+        return (
+            <Grid item xs={6} md={2} color="0xffffff" padding="5pt">
+                <Card style={{color: 'white', backgroundColor: '#e91e63'}}>
+                    <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
+                        <TagIcon/>
+                        <Typography variant="subtitle1" color="inherit" padding="5pt" align="left">
+                            {labelName}
+                        </Typography>
+                    </div>
+                </Card>
+            </Grid>
+        );
+    }
+
     return (
         <Container maxWidth="xl">
+            <div>
+                {alert ? <Alert severity='error'>{alertContent}</Alert> : <></> }
+            </div>
             <Box sx={{border: '1px dashed grey'}} margin="50pt" padding="20pt">
                 <Grid container>
                     <Grid item xs={6} md={8}>
@@ -139,7 +162,7 @@ export default function TextSummarizer() {
                 <DividerWithText>Outputs</DividerWithText>
 
                 <Grid container>
-                    <Grid item xs={6} md={4}>
+                    <Grid item xs={6} md={2}>
                         <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
                             <TagIcon/>
                             <Typography variant="subtitle1" color="inherit" padding="5pt" align="left">
@@ -147,46 +170,10 @@ export default function TextSummarizer() {
                             </Typography>
                         </div>
                     </Grid>
-                    <Grid item xs={6} md={2} color="0xffffff" padding="5pt">
-                        <Card style={{color: 'white', backgroundColor: '#e91e63'}}>
-                            <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                                <TagIcon/>
-                                <Typography variant="subtitle1" color="inherit" padding="5pt" align="left">
-                                    Science
-                                </Typography>
-                            </div>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={6} md={2} color="0xffffff" padding="5pt">
-                        <Card style={{color: 'white', backgroundColor: '#e91e63'}}>
-                            <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                                <TagIcon/>
-                                <Typography variant="subtitle1" color="inherit" padding="5pt" align="left">
-                                    Computer
-                                </Typography>
-                            </div>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={6} md={2} color="0xffffff" padding="5pt">
-                        <Card style={{color: 'white', backgroundColor: '#e91e63'}}>
-                            <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                                <TagIcon/>
-                                <Typography variant="subtitle1" color="inherit" padding="5pt" align="left">
-                                    SUTD
-                                </Typography>
-                            </div>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={6} md={2} color="0xffffff" padding="5pt">
-                        <Card style={{color: 'white', backgroundColor: '#e91e63'}}>
-                            <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                                <TagIcon/>
-                                <Typography variant="subtitle1" color="inherit" padding="5pt" align="left">
-                                    PlayStation
-                                </Typography>
-                            </div>
-                        </Card>
-                    </Grid>
+                    {label.split(",").map((labelName, index) => {
+                        return <Label labelName={labelName} key={index}/>
+                    }
+                    )}
                 </Grid>
 
                 <Grid container>
