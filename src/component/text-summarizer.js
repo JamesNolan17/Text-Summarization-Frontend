@@ -8,8 +8,10 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import Select, {SelectChangeEvent} from '@mui/material/Select';
 import Button from "@mui/material/Button";
 import TagIcon from '@mui/icons-material/Tag';
+import axios from "axios";
 
 export default function TextSummarizer() {
+    const IP_Predict = 'http://localhost:8000/text/input';
     const [inputText, setInputText] = React.useState('');
     const handleInputTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputText(event.target.value);
@@ -23,6 +25,25 @@ export default function TextSummarizer() {
     const [summarizedText, setSummarizedText] = React.useState('');
     const handleSummarizedTextChange = (event: SelectChangeEvent) => {
         setSummarizedText(event.target.value);
+    }
+
+    const handleSubmit = event => {
+        event.preventDefault();
+        const payloadText = inputText.replace('\"', '').replace('\'', '');
+        axios.post(IP_Predict,
+            {
+                "raw_text": payloadText,
+                "article_type": articleType
+            },
+            {
+            headers: {
+            'accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': 'MeSqAaXtGAgI7grNXRN75Vp7XFPgDcam7b1wd8BGFC6NGYdKrfwDkJsKcBTqNeGF'
+        }}).then(res => {
+                console.log(res);
+                console.log(res.data);
+            })
     }
 
 
@@ -85,7 +106,7 @@ export default function TextSummarizer() {
                     </Grid>
                     <Grid item xs={6} md={4}>
                         <Typography align='right'>
-                            <Button variant="contained" color="primary" size="large" startIcon={<ArticleIcon/>}>
+                            <Button variant="contained" color="primary" size="large" startIcon={<ArticleIcon/>} onClick={handleSubmit}>
                                 Summarize
                             </Button>
                         </Typography>
@@ -104,7 +125,7 @@ export default function TextSummarizer() {
                         <br/>
                         <TextField
                             id="filled-multiline-static"
-                            label="Input text here for summarization."
+                            label="Input text here for summarization"
                             multiline
                             rows={10}
                             fullWidth={true}
@@ -181,7 +202,7 @@ export default function TextSummarizer() {
                         <br/>
                         <TextField
                             id="filled-multiline-static"
-                            label="Input text here for summarization."
+                            label="Summarized Text"
                             multiline
                             rows={10}
                             fullWidth={true}
@@ -192,7 +213,6 @@ export default function TextSummarizer() {
                         />
                     </Grid>
                 </Grid>
-
             </Box>
         </Container>
     );
