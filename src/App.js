@@ -1,7 +1,7 @@
 import './App.css';
 import ButtonAppBar from './component/navbar';
 import React from "react";
-import TextSummarizer from "./component/text-summarizer";
+import View_main from "./component/view_main";
 
 
 
@@ -10,7 +10,7 @@ function App() {
     return (
         <div className="App">
             <ButtonAppBar />
-            <TextSummarizer />
+            <View_main />
         </div>
     );
 }

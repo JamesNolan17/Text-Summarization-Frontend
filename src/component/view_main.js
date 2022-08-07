@@ -10,7 +10,7 @@ import Button from "@mui/material/Button";
 import TagIcon from '@mui/icons-material/Tag';
 import axios from "axios";
 
-export default function TextSummarizer() {
+export default function View_main() {
     const IP_Predict = 'http://localhost:8000/text/input';
     const [alert, setAlert] = React.useState(false);
     const [alertContent, setAlertContent] = React.useState('');
@@ -31,7 +31,19 @@ export default function TextSummarizer() {
 
     const handleSubmit = event => {
         event.preventDefault();
-        const payloadText = inputText.replace('\"', '').replace('\'', '');
+        const payloadText = inputText
+            .replace('\"', '')
+            .replace('\'', '')
+            .replace('\\', "")
+            .replace('/', "")
+            .replace(/\\n/g, "\\n")
+            .replace(/\\'/g, "\\'")
+            .replace(/\\"/g, '\\"')
+            .replace(/\\&/g, "\\&")
+            .replace(/\\r/g, "\\r")
+            .replace(/\\t/g, "\\t")
+            .replace(/\\b/g, "\\b")
+            .replace(/\\f/g, "\\f");
         axios.post(IP_Predict,
             {
                 "raw_text": payloadText,
@@ -119,10 +131,9 @@ export default function TextSummarizer() {
                                     label="Article Type"
                                 >
                                     <MenuItem value={"News"}>News</MenuItem>
-                                    <MenuItem value={"General Article"}>Communication Messages</MenuItem>
+                                    <MenuItem value={"General Article"}>General Article</MenuItem>
                                     <MenuItem value={"Literary Works"}>Literary Works</MenuItem>
-                                    <MenuItem value={"Technical Note"}>Technical Note</MenuItem>
-                                    <MenuItem value={"Other"}>Other</MenuItem>
+                                    <MenuItem value={"Science Paper"}>Science Paper</MenuItem>
                                 </Select>
                             </FormControl>
                         </div>
